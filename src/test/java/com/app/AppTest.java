@@ -11,6 +11,7 @@ import org.junit.Assert;
 import org.junit.Ignore;
 import org.junit.Test;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -25,7 +26,7 @@ import java.util.Date;
 public class AppTest {
 
     // FIXME 修改namenode地址
-    private static final String HDFS_URL = "hdfs://node1:8020";
+    private static final String HDFS_URL = "hdfs://node2:8020";
     // FIXME 修改username
     private static final String USERNAME = "yancai";
 
@@ -100,7 +101,7 @@ public class AppTest {
      * @throws IOException
      */
     @Test
-    public void test_03_create() throws IOException {
+    public void test_03_create_open() throws IOException {
         String localFile = PATH_LOCAL + "/file_to_upload.txt";
         String hdfsFile = PATH_UPLOAD + "/test.txt";
 
@@ -120,6 +121,30 @@ public class AppTest {
         Assert.assertEquals(hdfsStr, fileStr);
     }
 
+
+    /**
+     * copyFromLocalFile 拷贝文件至hdfs
+     * rename   重命名文件
+     * copyToLocalFile  拷贝hdfs文件至本地
+     * @throws IOException
+     */
+    @Test
+    public void test_04_copyFromLocalFile_rename_copyToLocalFile() throws IOException {
+        String localFile = PATH_LOCAL + "/file_to_upload.txt";
+        String hdfsFile = PATH_UPLOAD + "/move.txt";
+        String hdfsRenameFile = PATH_UPLOAD + "/move_rename.txt";
+        String localDownloadFile = PATH_LOCAL + "/file_from_download.txt";
+
+        fs.copyFromLocalFile(new Path(localFile), new Path(hdfsFile));
+        Assert.assertTrue(fs.exists(new Path(hdfsFile)));
+
+        fs.rename(new Path(hdfsFile), new Path(hdfsRenameFile));
+        Assert.assertTrue(fs.exists(new Path(hdfsRenameFile)));
+        Assert.assertFalse(fs.exists(new Path(hdfsFile)));
+
+        fs.copyToLocalFile(new Path(hdfsRenameFile), new Path(localDownloadFile));
+        Assert.assertTrue((new File(localDownloadFile)).exists());
+    }
 
     @Test
     public void testListFiles() throws IOException {
